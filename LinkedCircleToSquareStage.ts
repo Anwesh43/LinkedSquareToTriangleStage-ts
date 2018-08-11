@@ -76,3 +76,71 @@ class Animator {
         }
     }
 }
+
+class CTSNode {
+    state : State = new State()
+    next : CTSNode
+    prev : CTSNode
+
+    constructor(private i : number) {
+        this.addNeighbor()
+    }
+
+    addNeighbor() {
+        if (this.i < nodes - 1) {
+            this.next = new CTSNode(this.i + 1)
+            this.next.prev = this
+        }
+    }
+
+    update(cb : Function) {
+        this.state.update(cb)
+    }
+
+    startUpdating(cb : Function) {
+        this.state.startUpdating(cb)
+    }
+
+    draw(context : CanvasRenderingContext2D) {
+        context.lineWidth = Math.min(w, h) / 60
+        context.lineCap = 'round'
+        context.strokeStyle = ''
+        const index : number = this.i % 2
+        var sc1 : number = Math.min(0.5, this.state.scale) * 2
+        const sc2 : number = Math.min(0.5, Math.max(this.state.scale - 0.5, 0)) * 2
+        sc1 = (1 - sc1) * index + (1 - index) * sc1
+        const gap : number = w / nodes
+        const r : number = gap / 3
+        const a : number = r * Math.cos(Math.PI/4)
+        context.save()
+        context.translate(gap * this.i + gap / 2 + gap * sc2, h/2)
+        for(var j = 0; j < 4; j++) {
+            context.save()
+            context.rotate(Math.PI/2 * j)
+            context.beginPath()
+            for (var k = 0; k <= 90; k++) {
+                const x = a * sc1 + r * Math.cos(k * Math.PI/180), y = r * sc1 * Math.sin(k * Math.PI/180)
+                if (k == 0) {
+                    context.moveTo(x, y)
+                } else {
+                    context.lineTo(x, y)
+                }
+            }
+            context.stroke()
+            context.restore()
+        }
+        context.restore()
+    }
+
+    getNext(dir : number, cb : Function) : CTSNode {
+        var curr : CTSNode = this.prev
+        if (dir == 1) {
+            curr = this.next
+        }
+        if (curr) {
+            return curr
+        }
+        cb()
+        return this
+    }
+}
