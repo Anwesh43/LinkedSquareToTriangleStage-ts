@@ -30,6 +30,7 @@ class LinkedCircleToSquareStage {
                     this.render()
                     this.lcts.update(() => {
                         this.animator.stop()
+                        this.render()
                     })
                 })
             })
@@ -49,7 +50,7 @@ class State {
     prevScale : number = 0
 
     update(cb : Function) {
-        this.scale += 0.1 * this.dir
+        this.scale += 0.05 * this.dir
         if (Math.abs(this.scale - this.prevScale) > 1) {
             this.scale = this.prevScale + this.dir
             this.dir = 0
@@ -114,7 +115,7 @@ class CTSNode {
     draw(context : CanvasRenderingContext2D) {
         context.lineWidth = Math.min(w, h) / 60
         context.lineCap = 'round'
-        context.strokeStyle = ''
+        context.strokeStyle = '#4CAF50'
         const index : number = this.i % 2
         var sc1 : number = Math.min(0.5, this.state.scale) * 2
         const sc2 : number = Math.min(0.5, Math.max(this.state.scale - 0.5, 0)) * 2
@@ -128,9 +129,9 @@ class CTSNode {
             context.save()
             context.rotate(Math.PI/2 * j)
             context.beginPath()
-            for (var k = 0; k <= 90; k++) {
-                const x = a * sc1 + r * Math.cos(k * Math.PI/180), y = r * sc1 * Math.sin(k * Math.PI/180)
-                if (k == 0) {
+            for (var k = 45; k <= 45 + 90; k++) {
+                const x = r * Math.cos(k * Math.PI/180), y = a * (1 - sc1) + r * sc1 * Math.sin(k * Math.PI/180)
+                if (k == 45) {
                     context.moveTo(x, y)
                 } else {
                     context.lineTo(x, y)
@@ -140,6 +141,9 @@ class CTSNode {
             context.restore()
         }
         context.restore()
+        if (this.next) {
+            this.next.draw(context)
+        }
     }
 
     getNext(dir : number, cb : Function) : CTSNode {
